@@ -10,10 +10,9 @@ const app = express()
 app.use(bodyParser.json())
 
 app.post('/todos', (req, res) => {
-  const todo = new Todo({
+  new Todo({
     text: req.body.text
-  })
-  todo.save().then(doc => {
+  }).save().then(doc => {
     res.send(doc)
   }).catch(e => {
     res.status(400).send(e)
@@ -21,3 +20,5 @@ app.post('/todos', (req, res) => {
 })
 
 app.listen(8079, () => console.log('Listening on 8079'))
+
+exports.app = app
