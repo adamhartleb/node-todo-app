@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const { sign, verify } = require('jsonwebtoken')
 const env = process.env.NODE_ENV || 'development'
 
 if (env === 'development') {
@@ -75,6 +76,21 @@ app.patch('/todos/:id', (req, res) => {
     if (!doc) throw 'Not found'
     res.status(200).send(doc)
   }).catch(e => res.status(404).send(e))
+})
+
+app.post('/users', (req, res) => {
+  const body = {
+    email: req.body.email,
+    password: req.body.password
+  }
+
+  const user = new User(body)
+
+  user.save().then(() => {
+    return user.generateAuthToken()
+  })
+  .then(token => res.header('x-auth', token).send(user))
+  .catch(e => res.status(400).send(e))
 })
 
 app.listen(process.env.PORT, () => console.log(`Listening on ${process.env.PORT}`))
