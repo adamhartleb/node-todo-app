@@ -19,6 +19,14 @@ app.post('/todos', (req, res) => {
   })
 })
 
+app.get('/todos', (req, res) => {
+  Todo.find().then(todos => {
+    res.send({
+      todos
+    })
+  }).catch(e => res.send(e))
+})
+
 app.listen(8079, () => console.log('Listening on 8079'))
 
 exports.app = app
