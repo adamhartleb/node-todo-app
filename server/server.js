@@ -29,9 +29,16 @@ app.get('/todos', (req, res) => {
 
 app.get('/todos/:id', (req, res) => {
   Todo.findById(req.params.id).then(doc => {
-    if (!doc) throw 'Cannot find this doc'
+    if (!doc) throw 'Not found'
     res.send(doc)
-  }).catch(e => res.send(e))
+  }).catch(e => res.status(404).send())
+})
+
+app.delete('/todos/:id', (req, res) => {
+  Todo.findOneAndRemove(req.params.id).then(doc => {
+    if (!doc) throw 'Not found'
+    res.send(doc)
+  }).catch(e => res.status(404).send(e))
 })
 
 app.listen(8079, () => console.log('Listening on 8079'))

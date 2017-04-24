@@ -16,7 +16,7 @@ beforeEach(done => {
   }).then(() => done())
 })
 
-describe('POST /todos', () => {
+describe('/todos route', () => {
   it('should create a new todo', done => {
     const text = 'test todo text'
 
@@ -75,6 +75,18 @@ describe('POST /todos', () => {
         expect(res.body).toInclude(todos[0])
         done()
       })
+  })
+  it('should return a 404 status if todo not found', done => {
+    request(app)
+      .get(`/todos/${ObjectID()}`)
+      .expect(404)
+      .end(done)
+  })
+  it('should return a 404 status if id param is not valid', done => {
+    request(app)
+      .get(`/todos/123abc`)
+      .expect(404)
+      .end(done)
   })
 })
 
