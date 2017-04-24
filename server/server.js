@@ -1,5 +1,14 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const env = process.env.NODE_ENV || 'development'
+
+if (env === 'development') {
+  process.env.PORT = 8079
+  process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoApp'
+} else if (env === 'test') {
+  process.env.PORT = 8079
+  process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoAppTest'
+}
 
 const { ObjectID } = require('mongodb')
 const { mongoose } = require('./db/mongoose')
@@ -68,6 +77,6 @@ app.patch('/todos/:id', (req, res) => {
   }).catch(e => res.status(404).send(e))
 })
 
-app.listen(8079, () => console.log('Listening on 8079'))
+app.listen(process.env.PORT, () => console.log(`Listening on ${process.env.PORT}`))
 
 exports.app = app

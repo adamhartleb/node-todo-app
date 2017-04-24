@@ -7,7 +7,8 @@ const { Todo } = require('../models/todo')
 const { User } = require('../models/user')
 
 const todos = [
-  { _id: ObjectID(), text: 'First text todo' }, { _id: ObjectID(), text: 'Second text todo' }
+  { _id: ObjectID(), text: 'First text todo', completed: false, completedAt: 123 }, 
+  { _id: ObjectID(), text: 'Second text todo', completed: true, completedAt: 123 }
 ]
 
 beforeEach(done => {
@@ -109,6 +110,35 @@ describe('/todos route', () => {
   it('should return 404 if id in delete route is not found', done => {
     request(app)
       .delete(`/todos/${ObjectID()}`)
+      .expect(404)
+      .end(done)
+  })
+  it('should update the specified todo', done => {
+    request(app)
+      .patch(`/todos/${todos[0]._id}`)
+      .send({
+        text: 'Wuzgud',
+        completed: true
+      })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err)
+        Todo.findById(todos[0]._id).then(todo => {
+          expect(todo.text).toBe('Wuzgud')
+          expect(todo.completed).toBe(true)
+          done()
+        })
+      })
+  })
+  it('should not update a not found todo id', done => {
+    request(app)
+      .patch(`/todos/${ObjectID()}`)
+      .expect(404)
+      .end(done)
+  })
+  it('should throw an error on invalid todo id', done => {
+    request(app)
+      .patch(`/todos/abc1231`)
       .expect(404)
       .end(done)
   })
