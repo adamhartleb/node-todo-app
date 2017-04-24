@@ -88,5 +88,29 @@ describe('/todos route', () => {
       .expect(404)
       .end(done)
   })
+  it('should remove the specified todo', done => {
+    request(app)
+      .delete(`/todos/${todos[0]._id}`)
+      .expect(200)
+      .end((err, res) => {
+        expect(res.body.text).toBe(todos[0].text)
+        Todo.find().then(results => {
+          expect(results.length).toBe(1)
+          done()
+        })
+      })
+  })
+  it('should return 404 if id in delete route is not valid', done => {
+    request(app)
+      .delete('/todos/123abc')
+      .expect(404)
+      .end(done)
+  })
+  it('should return 404 if id in delete route is not found', done => {
+    request(app)
+      .delete(`/todos/${ObjectID()}`)
+      .expect(404)
+      .end(done)
+  })
 })
 

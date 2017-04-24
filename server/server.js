@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 
+const { ObjectID } = require('mongodb')
 const { mongoose } = require('./db/mongoose')
 const { User } = require('./models/user')
 const { Todo } = require('./models/todo')
@@ -28,16 +29,42 @@ app.get('/todos', (req, res) => {
 })
 
 app.get('/todos/:id', (req, res) => {
-  Todo.findById(req.params.id).then(doc => {
+  const { id } = req.params
+  if (!ObjectID.isValid(id)) return res.status(404).send()
+
+  Todo.findById(id).then(doc => {
     if (!doc) throw 'Not found'
     res.send(doc)
   }).catch(e => res.status(404).send())
 })
 
 app.delete('/todos/:id', (req, res) => {
-  Todo.findOneAndRemove(req.params.id).then(doc => {
+  const { id } = req.params
+  if (!ObjectID.isValid(id)) return res.status(404).send()
+
+  Todo.findByIdAndRemove(id).then(doc => {
     if (!doc) throw 'Not found'
     res.send(doc)
+  }).catch(e => res.status(404).send())
+})
+
+app.patch('/todos/:id', (req, res) => {
+  const { id } = req.params
+  let completedAt
+  let { text, completed } = req.body
+
+  if (!ObjectID.isValid(id)) return res.status(404).send()
+
+  if (typeof completed === 'boolean' && completed) {
+    completedAt = new Date().getTime()
+  } else {
+    completed = false
+    completedAt = null
+  }
+
+  Todo.findByIdAndUpdate(id, { text, completed, completedAt }, { new: true }).then(doc => {
+    if (!doc) throw 'Not found'
+    res.status(200).send(doc)
   }).catch(e => res.status(404).send(e))
 })
 
