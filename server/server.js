@@ -27,6 +27,13 @@ app.get('/todos', (req, res) => {
   }).catch(e => res.send(e))
 })
 
+app.get('/todos/:id', (req, res) => {
+  Todo.findById(req.params.id).then(doc => {
+    if (!doc) throw 'Cannot find this doc'
+    res.send(doc)
+  }).catch(e => res.send(e))
+})
+
 app.listen(8079, () => console.log('Listening on 8079'))
 
 exports.app = app
