@@ -17,7 +17,8 @@ describe('/todos route', () => {
 
     request(app)
       .post('/todos')
-      .send({ text })
+      .set('x-auth', users[0].tokens[0].token)
+      .send({ text, _creator: users[0]._id })
       .expect(200)
       .expect(res => {
         expect(res.body.text).toBe(text)
@@ -25,8 +26,8 @@ describe('/todos route', () => {
       .end((err, res) => {
         if (err) return done(err)
         
-        Todo.find().then(todos => {
-          expect(todos.length).toBe(3)
+        Todo.find({ _creator: users[0]._id }).then(todos => {
+          expect(todos.length).toBe(2)
           expect(todos[todos.length - 1].text).toBe(text)
           done()
         }).catch(err => done(err))
@@ -38,15 +39,8 @@ describe('/todos route', () => {
     request(app)
       .post('/todos')
       .send({ text })
-      .expect(400)
-      .end((err, res) => {
-        if (err) return done(err)
-
-        Todo.find().then(todos => {
-          expect(todos.length).toBe(2)
-          done()
-        }).catch(e => done(ez))
-      })
+      .expect(401)
+      .end(done)
   })
 
   it('should get all todos', done => {
@@ -187,6 +181,25 @@ describe('/users route', () => {
         expect(res.body.email).toBe(users[0].email)
         expect(res.header['x-auth']).toExist()
       })
+      .end(done)
+  })
+  it('should delete a user\'s token  with the associated auth token', done => {
+    request(app)
+      .delete('/users/me/token')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .end((err, res) => {
+        User.findById(users[0]._id).then(user => {
+          expect(user.tokens.length).toBe(0)
+          done()
+        }).catch(e => done(e))
+      })
+  })
+  it('should not delete a user if the token is not valid', done => {
+    request(app)
+      .delete('/users/me/token')
+      .set('x-auth', '123awdq')
+      .expect(401)
       .end(done)
   })
 })

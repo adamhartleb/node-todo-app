@@ -104,5 +104,15 @@ UserSchema.methods.generateAuthToken = function () {
   })
 }
 
+UserSchema.methods.removeToken = function (token) {
+  const user = this
+
+  return user.update({
+    $pull: {
+      tokens: { token }
+    }
+  })
+}
+
 exports.User = mongoose.model('User', UserSchema)
 

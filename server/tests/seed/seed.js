@@ -22,8 +22,8 @@ const users = [
 ]
 
 const todos = [
-  { _id: ObjectID(), text: 'First text todo', completed: false, completedAt: 123 }, 
-  { _id: ObjectID(), text: 'Second text todo', completed: true, completedAt: 123 }
+  { _id: ObjectID(), text: 'First text todo', completed: false, completedAt: 123, _creator: userOneId }, 
+  { _id: ObjectID(), text: 'Second text todo', completed: true, completedAt: 123, _creator: userTwoId }
 ]
 
 const populateTodos = done => {
