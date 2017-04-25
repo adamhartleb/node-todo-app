@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const { isEmail } = require('validator')
-const { sign } = require('jsonwebtoken')
+const { sign, verify } = require('jsonwebtoken')
 
 const UserSchema = mongoose.Schema({
   email: {
@@ -30,6 +30,23 @@ const UserSchema = mongoose.Schema({
     }
   }] 
 })
+
+UserSchema.statics.findByToken = function (token) {
+  const User = this
+  let decoded
+
+  try {
+    decoded = verify(token, 'abc123')
+  } catch (e) {
+    return new Promise.reject()
+  }
+
+  return User.findOne({
+    '_id': decoded._id,
+    'tokens.token': token,
+    'tokens.access': 'auth'
+  })
+}
 
 UserSchema.methods.toJSON = function () {
   const user = this

@@ -15,6 +15,8 @@ const { ObjectID } = require('mongodb')
 const { mongoose } = require('./db/mongoose')
 const { User } = require('./models/user')
 const { Todo } = require('./models/todo')
+const { authenticate } = require('./middleware/authenticate')
+const { hashing } = require('./middleware/hashing')
 
 const app = express()
 
@@ -78,10 +80,10 @@ app.patch('/todos/:id', (req, res) => {
   }).catch(e => res.status(404).send(e))
 })
 
-app.post('/users', (req, res) => {
+app.post('/users', hashing, (req, res) => {
   const body = {
-    email: req.body.email,
-    password: req.body.password
+    email: req.email,
+    password: req.password
   }
 
   const user = new User(body)
@@ -91,6 +93,10 @@ app.post('/users', (req, res) => {
   })
   .then(token => res.header('x-auth', token).send(user))
   .catch(e => res.status(400).send(e))
+})
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user)
 })
 
 app.listen(process.env.PORT, () => console.log(`Listening on ${process.env.PORT}`))
