@@ -16,7 +16,7 @@ const { mongoose } = require('./db/mongoose')
 const { User } = require('./models/user')
 const { Todo } = require('./models/todo')
 const { authenticate } = require('./middleware/authenticate')
-const { hashing } = require('./middleware/hashing')
+const bcrypt = require('bcryptjs')
 
 const app = express()
 
@@ -80,10 +80,10 @@ app.patch('/todos/:id', (req, res) => {
   }).catch(e => res.status(404).send(e))
 })
 
-app.post('/users', hashing, (req, res) => {
+app.post('/users', (req, res) => {
   const body = {
-    email: req.email,
-    password: req.password
+    email: req.body.email,
+    password: req.body.password
   }
 
   const user = new User(body)
@@ -93,6 +93,18 @@ app.post('/users', hashing, (req, res) => {
   })
   .then(token => res.header('x-auth', token).send(user))
   .catch(e => res.status(400).send(e))
+})
+
+app.post('/users/login', (req, res) => {
+  const { email, password } = req.body
+  
+  User.findByCredentials(email, password).then(user => {
+    return user.generateAuthToken().then(token => {
+      res.header('x-auth', token).send(user)
+    })
+  }).catch(e => {
+    res.status(400).send()
+  })
 })
 
 app.get('/users/me', authenticate, (req, res) => {

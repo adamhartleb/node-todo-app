@@ -175,5 +175,19 @@ describe('/users route', () => {
       .expect(401)
       .end(done)
   })
+  it('should return an auth token once the user logs in', done => {
+    request(app)
+      .post('/users/login')
+      .send({
+        email: users[0].email,
+        password: users[0].password
+      })
+      .expect(200)
+      .expect(res => {
+        expect(res.body.email).toBe(users[0].email)
+        expect(res.header['x-auth']).toExist()
+      })
+      .end(done)
+  })
 })
 

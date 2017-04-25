@@ -6,13 +6,9 @@ const password = '123abc'
 
 bcrypt.genSalt(10, (err, salt) => {
   bcrypt.hash(password, salt, (err, hash) => {
-    
+    bcrypt.compare(password, hash, (err, res) => {
+      console.log(res)
+    })
   })
 })
 
-const data = {
-  id: 10
-}
-
-const token = sign(data, '123abc')
-console.log(verify(token, '123abc'))
