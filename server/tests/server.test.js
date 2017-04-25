@@ -5,17 +5,11 @@ const { ObjectID } = require('mongodb')
 const { app } = require('../server')
 const { Todo } = require('../models/todo')
 const { User } = require('../models/user')
+const { todos, users, populateTodos, populateUsers } = require('./seed/seed')
 
-const todos = [
-  { _id: ObjectID(), text: 'First text todo', completed: false, completedAt: 123 }, 
-  { _id: ObjectID(), text: 'Second text todo', completed: true, completedAt: 123 }
-]
 
-beforeEach(done => {
-  Todo.remove({}).then(() => {
-    return Todo.insertMany(todos)
-  }).then(() => done())
-})
+beforeEach(populateTodos)
+beforeEach(populateUsers)
 
 describe('/todos route', () => {
   it('should create a new todo', done => {
@@ -140,6 +134,45 @@ describe('/todos route', () => {
     request(app)
       .patch(`/todos/abc1231`)
       .expect(404)
+      .end(done)
+  })
+})
+
+describe('/users route', () => {
+  it('should create a new user', done => {
+    const testEmail = 'test123@gmail.com'
+    request(app)
+      .post('/users')
+      .send({ email: testEmail, password: '123abc' })
+      .expect(200)
+      .end((err, res) => {
+        expect(res.body.email).toBe(testEmail)
+        expect(res.body._id).toExist()
+        done()
+      })
+  })
+  it('should not create a new user without a password', done => {
+    request(app)
+      .post('/users')
+      .send({ email: '', password: '' })
+      .expect(400)
+      .end(done)
+  })
+  it('should return the authenticated user', done => {
+    request(app)
+      .get('/users/me')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .end((err, res) => {
+        expect(res.body.email).toBe(users[0].email)
+        done()
+      })
+  })
+  it('should not return the user without a valid auth token', done => {
+    request(app)
+      .get('/users/me')
+      .set('x-auth', '12312ad')
+      .expect(401)
       .end(done)
   })
 })
