@@ -46,11 +46,12 @@ describe('/todos route', () => {
   it('should get all todos', done => {
     request(app)
       .get('/todos')
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .end((err, res) => {
         if (err) return done(err)
 
-        expect(res.body.todos.length).toBe(todos.length)
+        expect(res.body.todos.length).toBe(1)
         done()
       })
   })
@@ -58,6 +59,7 @@ describe('/todos route', () => {
   it('should retrieve a single todo by id', done => {
     request(app)
       .get(`/todos/${todos[0]._id}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .end((err, res) => {
         if (err) return done(err)
@@ -68,18 +70,21 @@ describe('/todos route', () => {
   it('should return a 404 status if todo not found', done => {
     request(app)
       .get(`/todos/${ObjectID()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done)
   })
   it('should return a 404 status if id param is not valid', done => {
     request(app)
       .get(`/todos/123abc`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done)
   })
   it('should remove the specified todo', done => {
     request(app)
       .delete(`/todos/${todos[0]._id}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .end((err, res) => {
         expect(res.body.text).toBe(todos[0].text)
@@ -92,18 +97,21 @@ describe('/todos route', () => {
   it('should return 404 if id in delete route is not valid', done => {
     request(app)
       .delete('/todos/123abc')
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done)
   })
   it('should return 404 if id in delete route is not found', done => {
     request(app)
       .delete(`/todos/${ObjectID()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done)
   })
   it('should update the specified todo', done => {
     request(app)
       .patch(`/todos/${todos[0]._id}`)
+      .set('x-auth', users[0].tokens[0].token)
       .send({
         text: 'Wuzgud',
         completed: true
@@ -121,12 +129,14 @@ describe('/todos route', () => {
   it('should not update a not found todo id', done => {
     request(app)
       .patch(`/todos/${ObjectID()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done)
   })
   it('should throw an error on invalid todo id', done => {
     request(app)
       .patch(`/todos/abc1231`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done)
   })
